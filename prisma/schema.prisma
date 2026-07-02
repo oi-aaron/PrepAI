@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Better Auth models (required for Step 3)
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions          Session[]
+  accounts          Account[]
+  resumes           Resume[]
+  roadmaps          Roadmap[]
+  interviewSessions InterviewSession[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@map("verification")
+}
+
+// ---------------------------------------------------------------------------
+// PrepAI domain models
+// ---------------------------------------------------------------------------
+
+model Company {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  industry    String?
+  description String?
+  logoUrl     String?
+  websiteUrl  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roadmaps          Roadmap[]
+  interviewSessions InterviewSession[]
+
+  @@index([name])
+  @@map("company")
+}
+
+model Resume {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  fileName      String
+  fileUrl       String
+  fileSize      Int?
+  mimeType      String?
+
+  extractedText String?
+  analysis      Json?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@map("resume")
+}
+
+model Roadmap {
+  id        String        @id @default(uuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String?
+  company   Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  title     String
+  targetRole String?
+  status    RoadmapStatus @default(DRAFT)
+  progress  Int           @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([companyId])
+  @@map("roadmap")
+}
+
+model InterviewSession {
+  id              String                 @id @default(uuid())
+  userId          String
+  user            User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId       String?
+  company         Company?               @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  title           String
+  type            InterviewType          @default(MIXED)
+  status          InterviewSessionStatus @default(SCHEDULED)
+  score           Int?
+  durationMinutes Int?
+  completedAt     DateTime?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  @@index([userId])
+  @@index([companyId])
+  @@map("interview_session")
+}
+
+enum RoadmapStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum InterviewSessionStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum InterviewType {
+  TECHNICAL
+  BEHAVIORAL
+  SYSTEM_DESIGN
+  MIXED
+}
