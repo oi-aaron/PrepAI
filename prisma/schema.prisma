@@ -12,17 +12,17 @@ datasource db {
 // ---------------------------------------------------------------------------
 
 model User {
-  id            String    @id
+  id            String   @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean  @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   sessions          Session[]
   accounts          Account[]
-  resumes           Resume[]
+  resumes           Resume?
   roadmaps          Roadmap[]
   interviewSessions InterviewSession[]
 
@@ -100,37 +100,38 @@ model Company {
 }
 
 model Resume {
-  id            String   @id @default(uuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id String @id @default(uuid())
 
-  fileName      String
-  fileUrl       String
-  fileSize      Int?
-  mimeType      String?
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  fileKey  String  @unique
+  fileName String
+  fileUrl  String
+  fileSize Int?
+  mimeType String?
 
   extractedText String?
   analysis      Json?
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@index([userId])
   @@map("resume")
 }
 
 model Roadmap {
-  id        String        @id @default(uuid())
-  userId    String
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyId String?
-  company   Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  title     String
+  id         String        @id @default(uuid())
+  userId     String
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId  String?
+  company    Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  title      String
   targetRole String?
-  status    RoadmapStatus @default(DRAFT)
-  progress  Int           @default(0)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  status     RoadmapStatus @default(DRAFT)
+  progress   Int           @default(0)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
 
   @@index([userId])
   @@index([companyId])
