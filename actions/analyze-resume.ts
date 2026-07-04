@@ -1,28 +1,17 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { getServerSession } from "@/lib/auth/server";
+import { auth } from "@/lib/auth/auth";
+import { headers } from "next/headers";
 import {
   extractResumeText,
   analyzeResumeWithAI,
 } from "@/lib/ai/resume";
 
-export async function getCurrentUserResume() {
-  const session = await getServerSession();
-
-  if (!session?.user) {
-    return null;
-  }
-
-  return prisma.resume.findUnique({
-    where: {
-      userId: session.user.id,
-    },
+export async function analyzeResume() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
   });
-}
-
-export async function analyzeResumeAction() {
-  const session = await getServerSession();
 
   if (!session?.user) {
     throw new Error("Unauthorized");
@@ -38,21 +27,15 @@ export async function analyzeResumeAction() {
     throw new Error("Resume not found.");
   }
 
-  // Return cached analysis
+  // Optional cache
   if (resume.analysis) {
-    return {
-      success: true,
-      analysis: resume.analysis,
-    };
+    return resume.analysis;
   }
 
-  // Extract text from the PDF
   const extractedText = await extractResumeText(resume.fileUrl);
 
-  // Analyze with Gemini (returns a JS object)
   const analysis = await analyzeResumeWithAI(extractedText);
 
-  // Save both the extracted text and the JSON analysis
   await prisma.resume.update({
     where: {
       userId: session.user.id,
@@ -63,8 +46,5 @@ export async function analyzeResumeAction() {
     },
   });
 
-  return {
-    success: true,
-    analysis,
-  };
+  return analysis;
 }

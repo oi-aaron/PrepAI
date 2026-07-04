@@ -40,7 +40,7 @@ export const ourFileRouter = {
           fileSize: file.size,
           mimeType: file.type,
 
-          // Reset AI output when uploading a new resume
+          // Reset previous AI results when a new resume is uploaded
           extractedText: null,
           analysis: null,
         },
@@ -56,7 +56,7 @@ export const ourFileRouter = {
       });
 
       return {
-        success: true,
+        uploaded: true,
       };
     }),
 } satisfies FileRouter;
