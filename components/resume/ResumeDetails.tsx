@@ -1,6 +1,8 @@
 import { Resume } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import AnalyzeResumeButton from "./AnalyzeResumeButton";
+import ResumeAnalysis from "./ResumeAnalysis";
+import { ResumeAnalysis as ResumeAnalysisType } from "@/lib/types/resume";
 
 interface Props {
   resume: Resume | null;
@@ -44,18 +46,11 @@ export default function ResumeDetails({ resume }: Props) {
         <AnalyzeResumeButton />
       </div>
 
-      {/* Extracted Resume Text */}
-      {resume.extractedText && (
-        <div className="rounded-lg border bg-muted/50 p-4">
-          <h4 className="mb-3 font-semibold">
-            Extracted Resume Text
-          </h4>
-
-          <pre className="whitespace-pre-wrap break-words text-sm font-sans">
-            {resume.extractedText}
-          </pre>
-        </div>
-      )}
+      {resume.analysis && (
+  <ResumeAnalysis
+    analysis={resume.analysis as ResumeAnalysisType}
+  />
+)}
     </div>
   );
 }
