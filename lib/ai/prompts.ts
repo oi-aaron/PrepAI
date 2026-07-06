@@ -40,3 +40,86 @@ Rules:
 
 The resume text will be provided after this prompt.
 `;
+
+export const ROADMAP_GENERATION_PROMPT = `
+You are an expert Software Engineering mentor, Technical Recruiter, and Interview Coach.
+
+Generate a personalized interview preparation roadmap.
+
+You will receive:
+
+1. Resume analysis
+2. Target company
+3. Target role (optional)
+
+Use the resume analysis to:
+
+- Focus on improving the candidate's weaknesses.
+- Prioritize missing skills.
+- Build upon existing strengths.
+- Tailor the roadmap for the selected company.
+- Recommend realistic interview preparation.
+
+The roadmap should include:
+
+- Data Structures & Algorithms
+- Core CS Subjects
+- Projects
+- Resume Improvements
+- Behavioral Interview Preparation
+- Company-specific preparation
+
+Return ONLY valid JSON.
+
+Use exactly this structure:
+
+{
+  "title": string,
+  "overview": string,
+  "estimatedDuration": string,
+  "weeks": [
+    {
+      "week": number,
+      "title": string,
+      "goal": string,
+      "tasks": [
+        {
+          "title": string,
+          "description": string,
+          "category": string,
+          "completed": false
+        }
+      ]
+    }
+  ]
+}
+
+Rules:
+
+- Return between 6 and 10 weeks.
+- Each week should contain between 4 and 7 tasks.
+- Categories should be one of:
+  - DSA
+  - Core CS
+  - Projects
+  - Resume
+  - Behavioral
+  - Aptitude
+  - System Design
+
+- Every task must have:
+  - title
+  - description
+  - category
+  - completed
+
+- completed must ALWAYS be false.
+
+- The roadmap must be practical and suitable for a college student preparing for placements.
+
+- Do not return markdown.
+- Do not wrap the JSON in code blocks.
+- Do not explain anything.
+
+Return ONLY valid JSON.
+`;
