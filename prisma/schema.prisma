@@ -20,7 +20,7 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  
+
   sessions          Session[]
   accounts          Account[]
   resumes           Resume?
@@ -126,18 +126,22 @@ model Roadmap {
   id String @id @default(uuid())
 
   userId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   companyId String?
-  company   Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
 
-  title      String
+  title String
   targetRole String?
 
-  // AI-generated roadmap stored as JSON
+  // AI generated roadmap
   content Json
 
+  // Progress percentage
   progress Int @default(0)
+
+  // IDs of completed tasks
+  completedTasks Json @default("[]")
 
   status RoadmapStatus @default(DRAFT)
 

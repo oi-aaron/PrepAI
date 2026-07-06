@@ -8,14 +8,28 @@ import {
   import { Badge } from "@/components/ui/badge";
   
   import { RoadmapContent } from "@/lib/types/roadmap";
+  import RoadmapTask from "./RoadmapTask";
   
   interface Props {
+    roadmapId: string;
     roadmap: RoadmapContent;
+    completedTasks: string[];
+    progress: number;
   }
   
   export default function RoadmapView({
+    roadmapId,
     roadmap,
+    completedTasks,
+    progress,
   }: Props) {
+    const totalTasks = roadmap.weeks.reduce(
+      (total, week) => total + week.tasks.length,
+      0
+    );
+  
+    const completedCount = completedTasks.length;
+  
     return (
       <div className="space-y-8">
         {/* Header */}
@@ -32,6 +46,37 @@ import {
           <Badge className="mt-4">
             {roadmap.estimatedDuration}
           </Badge>
+  
+          {/* Progress */}
+  
+          <Card className="mt-6">
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold">
+                    Overall Progress
+                  </h3>
+  
+                  <span className="text-sm text-muted-foreground">
+                    {progress}%
+                  </span>
+                </div>
+  
+                <div className="h-3 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full bg-primary transition-all duration-300"
+                    style={{
+                      width: `${progress}%`,
+                    }}
+                  />
+                </div>
+  
+                <p className="text-sm text-muted-foreground">
+                  {completedCount} / {totalTasks} tasks completed
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
   
         {/* Weeks */}
@@ -51,26 +96,21 @@ import {
   
               <CardContent>
                 <div className="space-y-4">
-                  {week.tasks.map((task, index) => (
-                    <div
-                      key={index}
-                      className="rounded-lg border p-4"
-                    >
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-semibold">
-                          {task.title}
-                        </h4>
+                  {week.tasks.map((task, index) => {
+                    const taskId = `week${week.week}-task${index}`;
   
-                        <Badge variant="secondary">
-                          {task.category}
-                        </Badge>
-                      </div>
-  
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        {task.description}
-                      </p>
-                    </div>
-                  ))}
+                    return (
+                      <RoadmapTask
+                        key={taskId}
+                        roadmapId={roadmapId}
+                        taskId={taskId}
+                        title={task.title}
+                        description={task.description}
+                        category={task.category}
+                        completed={completedTasks.includes(taskId)}
+                      />
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
