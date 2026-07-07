@@ -155,23 +155,47 @@ model Roadmap {
 }
 
 model InterviewSession {
-  id              String                 @id @default(uuid())
-  userId          String
-  user            User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyId       String?
-  company         Company?               @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  title           String
-  type            InterviewType          @default(MIXED)
-  status          InterviewSessionStatus @default(SCHEDULED)
-  score           Int?
+  id String @id @default(uuid())
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  companyId String?
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  title String
+
+  type InterviewType
+
+  difficulty InterviewDifficulty @default(MEDIUM)
+
+  status InterviewSessionStatus @default(SCHEDULED)
+
+  questions Json?
+
+  answers Json?
+
+  feedback Json?
+
+  score Int?
+
   durationMinutes Int?
-  completedAt     DateTime?
-  createdAt       DateTime               @default(now())
-  updatedAt       DateTime               @updatedAt
+
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([companyId])
+
   @@map("interview_session")
+}
+
+enum InterviewDifficulty {
+  EASY
+  MEDIUM
+  HARD
 }
 
 enum RoadmapStatus {

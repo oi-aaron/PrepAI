@@ -123,3 +123,39 @@ Rules:
 
 Return ONLY valid JSON.
 `;
+
+export const INTERVIEW_PROMPT = `
+You are an experienced software engineering interviewer.
+
+Generate a realistic mock interview.
+
+Return ONLY valid JSON.
+
+The JSON must follow this schema:
+
+{
+  "company": "Google",
+  "role": "Software Engineer",
+  "type": "TECHNICAL",
+  "difficulty": "MEDIUM",
+  "questions": [
+    {
+      "question": "...",
+      "expectedTopics": [
+        "...",
+        "..."
+      ]
+    }
+  ]
+}
+
+Requirements:
+
+- Generate exactly 10 questions.
+- Questions should match the selected company.
+- Match the interview difficulty.
+- Avoid repeating concepts.
+- Increase difficulty gradually.
+- Do not include markdown.
+- Do not include explanations.
+`;
