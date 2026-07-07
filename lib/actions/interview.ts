@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { getServerSession } from "@/lib/auth/server";
-
+import { evaluateInterview } from "@/lib/ai/evaluation";
 import { generateInterviewQuestions } from "@/lib/ai/interview";
 
 export async function startInterviewAction(
@@ -79,3 +79,75 @@ export async function startInterviewAction(
 
   return interview.id;
 }
+
+export async function evaluateInterviewAction(
+    interviewId: string
+  ) {
+    const session = await getServerSession();
+  
+    if (!session?.user) {
+      throw new Error("Unauthorized");
+    }
+  
+    const interview = await prisma.interviewSession.findUnique({
+      where: {
+        id: interviewId,
+      },
+      include: {
+        company: true,
+      },
+    });
+  
+    if (!interview) {
+      throw new Error("Interview not found.");
+    }
+  
+    if (interview.userId !== session.user.id) {
+      throw new Error("Unauthorized");
+    }
+  
+    const resume = await prisma.resume.findUnique({
+      where: {
+        userId: session.user.id,
+      },
+    });
+  
+    if (!resume?.extractedText) {
+      throw new Error(
+        "Resume analysis is required before evaluation."
+      );
+    }
+  
+    if (!interview.questions) {
+      throw new Error("Interview questions not found.");
+    }
+  
+    if (!interview.answers) {
+      throw new Error("No interview answers found.");
+    }
+  
+    const feedback = await evaluateInterview(
+      interview.questions,
+      interview.answers,
+      resume.extractedText,
+      interview.company?.name ?? "Unknown Company",
+      "Software Engineer",
+      interview.type,
+      interview.difficulty
+    );
+  
+    await prisma.interviewSession.update({
+      where: {
+        id: interview.id,
+      },
+      data: {
+        feedback,
+        status: "COMPLETED",
+        completedAt: new Date(),
+      },
+    });
+  
+    return {
+      success: true,
+    };
+  }

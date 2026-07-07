@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 import { saveAnswerAction } from "@/lib/actions/interview-progress";
+import { evaluateInterviewAction } from "@/lib/actions/interview";
 
 import {
   InterviewQuestion,
@@ -19,13 +22,14 @@ interface Props {
 export default function InterviewPlayer({
   interview,
 }: Props) {
+  const router = useRouter();
+
   const questions: InterviewQuestion[] =
     interview.questions?.questions ?? [];
 
   const existingAnswers = interview.answers ?? [];
 
-  const [currentQuestion, setCurrentQuestion] =
-    useState(0);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
 
   const [answer, setAnswer] = useState(
     existingAnswers.find(
@@ -42,6 +46,7 @@ export default function InterviewPlayer({
       answer
     );
 
+    // More questions remaining
     if (currentQuestion < totalQuestions - 1) {
       const next = currentQuestion + 1;
 
@@ -51,6 +56,35 @@ export default function InterviewPlayer({
         existingAnswers.find(
           (a) => a.questionIndex === next
         )?.answer ?? ""
+      );
+
+      return;
+    }
+
+    // Final question
+    const loading = toast.loading(
+      "Evaluating your interview..."
+    );
+
+    try {
+      await evaluateInterviewAction(interview.id);
+
+      toast.dismiss(loading);
+
+      toast.success(
+        "Interview evaluated successfully!"
+      );
+
+      router.push(
+        `/interview/${interview.id}/report`
+      );
+    } catch (error) {
+      toast.dismiss(loading);
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong."
       );
     }
   }
