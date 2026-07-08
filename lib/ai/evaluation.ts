@@ -10,6 +10,17 @@ export async function evaluateInterview(
   type: string,
   difficulty: string
 ) {
+  const normalizedAnswers = Array.isArray(answers)
+    ? answers.map((answer) => ({
+        ...answer,
+        answer:
+          typeof answer.answer === "string" &&
+          answer.answer.trim()
+            ? answer.answer.trim()
+            : "No answer provided.",
+      }))
+    : [];
+
   const prompt = `
 ${INTERVIEW_EVALUATION_PROMPT}
 
@@ -35,7 +46,7 @@ ${JSON.stringify(questions, null, 2)}
 
 Candidate Answers:
 
-${JSON.stringify(answers, null, 2)}
+${JSON.stringify(normalizedAnswers, null, 2)}
 `;
 
   let response;
@@ -58,19 +69,19 @@ ${JSON.stringify(answers, null, 2)}
   if (!text) {
     throw new Error("Gemini returned an empty evaluation.");
   }
-  
-  // Remove markdown code fences if Gemini added them
+
+  // Remove Markdown code fences if Gemini wraps the JSON
   text = text
     .replace(/^```json\s*/i, "")
     .replace(/^```\s*/i, "")
     .replace(/\s*```$/, "")
     .trim();
-  
+
   try {
     return JSON.parse(text);
   } catch {
     console.error("Invalid Gemini Evaluation JSON:", text);
-  
+
     throw new Error("Gemini returned invalid evaluation JSON.");
   }
 }

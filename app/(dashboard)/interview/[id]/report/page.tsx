@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import DashboardCard from "@/components/dashboard/DashboardCard";
 import InterviewReport from "@/components/interview/InterviewReport";
 
@@ -15,6 +17,11 @@ export default async function InterviewReportPage({
   const { id } = await params;
 
   const interview = await getInterviewSession(id);
+
+  // Prevent users from viewing the report before evaluation
+  if (!interview.feedback) {
+    redirect(`/interview/${id}`);
+  }
 
   return (
     <DashboardCard

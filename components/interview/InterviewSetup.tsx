@@ -1,16 +1,40 @@
 "use client";
 
-import { useState } from "react";
 import { Company } from "@prisma/client";
+import { useState } from "react";
 
 import StartInterviewButton from "./StartInterviewButton";
+import RecentInterviews from "./RecentInterviews";
+
+import {
+  InterviewDifficulty,
+  InterviewSessionStatus,
+  InterviewType,
+} from "@prisma/client";
 
 interface Props {
   companies: Company[];
+
+  resumeReady: boolean;
+
+  recentInterviews: {
+    id: string;
+    title: string;
+    type: InterviewType;
+    difficulty: InterviewDifficulty;
+    status: InterviewSessionStatus;
+    score: number | null;
+    createdAt: Date;
+    company: {
+      name: string;
+    } | null;
+  }[];
 }
 
 export default function InterviewSetup({
   companies,
+  resumeReady,
+  recentInterviews,
 }: Props) {
   const [companyId, setCompanyId] = useState(
     companies[0]?.id ?? ""
@@ -25,7 +49,8 @@ export default function InterviewSetup({
   >("MEDIUM");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
+      {/* Company */}
       <div>
         <label className="mb-2 block font-medium">
           Company
@@ -49,6 +74,7 @@ export default function InterviewSetup({
         </select>
       </div>
 
+      {/* Interview Type */}
       <div>
         <label className="mb-2 block font-medium">
           Interview Type
@@ -79,6 +105,7 @@ export default function InterviewSetup({
         </select>
       </div>
 
+      {/* Difficulty */}
       <div>
         <label className="mb-2 block font-medium">
           Difficulty
@@ -111,6 +138,11 @@ export default function InterviewSetup({
         companyId={companyId}
         type={type}
         difficulty={difficulty}
+        resumeReady={resumeReady}
+      />
+
+      <RecentInterviews
+        interviews={recentInterviews}
       />
     </div>
   );

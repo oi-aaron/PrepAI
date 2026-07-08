@@ -37,16 +37,21 @@ export default function InterviewPlayer({
     )?.answer ?? ""
   );
 
+  const [isEvaluating, setIsEvaluating] =
+    useState(false);
+
   const totalQuestions = questions.length;
 
   async function nextQuestion() {
+    if (isEvaluating) return;
+
     await saveAnswerAction(
       interview.id,
       currentQuestion,
       answer
     );
 
-    // More questions remaining
+    // Move to next question
     if (currentQuestion < totalQuestions - 1) {
       const next = currentQuestion + 1;
 
@@ -61,7 +66,9 @@ export default function InterviewPlayer({
       return;
     }
 
-    // Final question
+    // Last question → Evaluate interview
+    setIsEvaluating(true);
+
     const loading = toast.loading(
       "Evaluating your interview..."
     );
@@ -79,6 +86,8 @@ export default function InterviewPlayer({
         `/interview/${interview.id}/report`
       );
     } catch (error) {
+      setIsEvaluating(false);
+
       toast.dismiss(loading);
 
       toast.error(
@@ -161,16 +170,20 @@ export default function InterviewPlayer({
       <div className="flex justify-between">
         <Button
           variant="outline"
-          disabled={currentQuestion === 0}
+          disabled={currentQuestion === 0 || isEvaluating}
           onClick={previousQuestion}
         >
           Previous
         </Button>
 
-        <Button onClick={nextQuestion}>
-          {currentQuestion ===
-          totalQuestions - 1
-            ? "Finish Interview"
+        <Button
+          onClick={nextQuestion}
+          disabled={isEvaluating}
+        >
+          {currentQuestion === totalQuestions - 1
+            ? isEvaluating
+              ? "Evaluating..."
+              : "Finish Interview"
             : "Next"}
         </Button>
       </div>

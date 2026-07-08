@@ -5,18 +5,21 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+
 import { startInterviewAction } from "@/lib/actions/interview";
 
 interface Props {
   companyId: string;
   type: "TECHNICAL" | "BEHAVIORAL" | "SYSTEM_DESIGN" | "MIXED";
   difficulty: "EASY" | "MEDIUM" | "HARD";
+  disabled?: boolean;
 }
 
 export default function StartInterviewButton({
   companyId,
   type,
   difficulty,
+  disabled = false,
 }: Props) {
   const router = useRouter();
 
@@ -31,6 +34,8 @@ export default function StartInterviewButton({
           difficulty
         );
 
+        toast.success("Interview generated successfully!");
+
         router.push(`/interview/${interviewId}`);
       } catch (error) {
         toast.error(
@@ -44,10 +49,11 @@ export default function StartInterviewButton({
 
   return (
     <Button
-      disabled={isPending}
+      className="w-full"
       onClick={handleClick}
+      disabled={disabled || isPending}
     >
-      {isPending ? "Starting..." : "Start Interview"}
+      {isPending ? "Starting Interview..." : "Start Interview"}
     </Button>
   );
 }
