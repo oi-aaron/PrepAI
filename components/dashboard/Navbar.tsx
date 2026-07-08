@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import { LogOut, BrainCircuit } from "lucide-react";
 import { authClient } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/hooks/use-session";
@@ -26,27 +26,34 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="flex h-16 items-center justify-between border-b bg-white px-8 shadow-sm">
+    <nav className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-border/60 bg-card/80 px-8 backdrop-blur">
       {/* Logo */}
-      <h1 className="text-2xl font-bold text-blue-600">
-        PrepAI
-      </h1>
+      <div className="flex items-center gap-3">
+        <div className="rounded-xl bg-primary/10 p-2 text-primary">
+          <BrainCircuit className="h-6 w-6" />
+        </div>
 
-      {/* User Info + Logout */}
-      <div className="flex items-center gap-4">
-        <div className="flex flex-col items-end">
-          <span className="text-sm font-semibold">
+        <h1 className="text-2xl font-bold tracking-tight">
+          PrepAI
+        </h1>
+      </div>
+
+      {/* User Info */}
+      <div className="flex items-center gap-5">
+        <div className="text-right">
+          <p className="text-sm font-semibold text-foreground">
             {session?.user.name ?? "User"}
-          </span>
+          </p>
 
-          <span className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             {session?.user.email}
-          </span>
+          </p>
         </div>
 
         <Button
           variant="outline"
           onClick={handleLogout}
+          className="hover:border-primary hover:text-primary"
         >
           <LogOut className="mr-2 h-4 w-4" />
           Logout

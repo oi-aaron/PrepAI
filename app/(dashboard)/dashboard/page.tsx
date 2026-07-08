@@ -1,6 +1,86 @@
-import DashboardCard from "@/components/dashboard/DashboardCard";
+import DashboardStats from "@/components/dashboard/DashboardStats";
+import ResumeStatus from "@/components/dashboard/ResumeStatus";
+import CurrentRoadmap from "@/components/dashboard/CurrentRoadmap";
+import RecentInterviews from "@/components/interview/RecentInterviews";
 
-export default function DashboardPage() {
+import prisma from "@/lib/prisma";
+import { getServerSession } from "@/lib/auth/server";
+
+export default async function DashboardPage() {
+  const session = await getServerSession();
+
+  if (!session?.user) {
+    return null;
+  }
+
+  const [
+    resume,
+    scoredInterviews,
+    roadmap,
+    recentInterviews,
+  ] = await Promise.all([
+    prisma.resume.findUnique({
+      where: {
+        userId: session.user.id,
+      },
+      select: {
+        extractedText: true,
+      },
+    }),
+
+    prisma.interviewSession.findMany({
+      where: {
+        userId: session.user.id,
+        score: {
+          not: null,
+        },
+      },
+      select: {
+        score: true,
+      },
+    }),
+
+    prisma.roadmap.findFirst({
+      where: {
+        userId: session.user.id,
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+      select: {
+        id: true,
+        title: true,
+        progress: true,
+      },
+    }),
+
+    prisma.interviewSession.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      include: {
+        company: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 3,
+    }),
+  ]);
+
+  const interviewCount = scoredInterviews.length;
+
+  const averageScore =
+    interviewCount === 0
+      ? 0
+      : Math.round(
+          scoredInterviews.reduce(
+            (sum, interview) =>
+              sum + (interview.score ?? 0),
+            0
+          ) / interviewCount
+        );
+
   return (
     <>
       <div className="mb-8">
@@ -8,30 +88,30 @@ export default function DashboardPage() {
           Welcome back 👋
         </h1>
 
-        <p className="mt-2 text-muted-foreground">
+        <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
           Your AI Interview Preparation Hub
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <DashboardCard
-          title="Resume"
-          description="Upload and analyze your resume with AI."
+      <DashboardStats
+        resumeReady={!!resume?.extractedText}
+        interviewCount={interviewCount}
+        averageScore={averageScore}
+        roadmapProgress={roadmap?.progress ?? 0}
+      />
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <ResumeStatus
+          resumeReady={!!resume?.extractedText}
         />
 
-        <DashboardCard
-          title="AI Roadmap"
-          description="Generate a personalized interview roadmap."
+        <CurrentRoadmap
+          title={roadmap?.title ?? "No roadmap yet"}
+          progress={roadmap?.progress ?? 0}
         />
 
-        <DashboardCard
-          title="Mock Interview"
-          description="Practice technical interviews."
-        />
-
-        <DashboardCard
-          title="Recent Activity"
-          description="Track your preparation history."
+        <RecentInterviews
+          interviews={recentInterviews}
         />
       </div>
     </>

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { InterviewSession, Company } from "@prisma/client";
+import { Plus } from "lucide-react";
 
 import {
   Card,
@@ -6,163 +8,100 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import {
-  InterviewDifficulty,
-  InterviewSessionStatus,
-  InterviewType,
-} from "@prisma/client";
-
 interface Props {
-  interviews: {
-    id: string;
-    title: string;
-    type: InterviewType;
-    difficulty: InterviewDifficulty;
-    status: InterviewSessionStatus;
-    score: number | null;
-    createdAt: Date;
-    company: {
-      name: string;
-    } | null;
-  }[];
+  interviews: (InterviewSession & {
+    company: Company | null;
+  })[];
 }
 
 export default function RecentInterviews({
   interviews,
 }: Props) {
-  if (interviews.length === 0) {
-    return null;
-  }
-
   return (
-    <div className="mt-10 space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>
           Recent Interviews
-        </h2>
+        </CardTitle>
 
-        <Link href="/interview/history">
-          <Button variant="outline">
-            View Full History
+        <Link href="/interview">
+          <Button size="sm">
+            <Plus className="mr-2 h-4 w-4" />
+            New
           </Button>
         </Link>
-      </div>
+      </CardHeader>
 
-      <div className="space-y-4">
-        {interviews.map((interview) => (
-          <Card key={interview.id}>
-            <CardHeader className="flex flex-row items-start justify-between">
-              <div>
-                <CardTitle>
-                  {interview.company?.name ??
-                    "Unknown Company"}
-                </CardTitle>
+      <CardContent>
+        {interviews.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No interviews yet.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {interviews.map((interview) => (
+              <div
+                key={interview.id}
+                className="rounded-lg border p-4"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-semibold">
+                      {interview.company?.name ??
+                        "Unknown Company"}
+                    </h3>
 
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {formatLabel(interview.type)} Interview
-                </p>
-              </div>
+                    <p className="text-sm text-muted-foreground">
+                      {interview.title}
+                    </p>
+                  </div>
 
-              <StatusBadge status={interview.status} />
-            </CardHeader>
+                  <Badge>
+                    {interview.status}
+                  </Badge>
+                </div>
 
-            <CardContent>
-              <div className="grid gap-3 text-sm md:grid-cols-2">
-                <p>
-                  <span className="font-medium">
-                    Difficulty:
-                  </span>{" "}
-                  {formatLabel(interview.difficulty)}
-                </p>
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="text-sm">
+                    {interview.score != null ? (
+                      <span className="font-medium">
+                        {interview.score}/100
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">
+                        Not graded
+                      </span>
+                    )}
+                  </div>
 
-                <p>
-                  <span className="font-medium">
-                    Created:
-                  </span>{" "}
-                  {interview.createdAt.toLocaleDateString()}
-                </p>
-
-                <p>
-                  <span className="font-medium">
-                    Score:
-                  </span>{" "}
-                  {interview.score ?? "-"}
-                </p>
-              </div>
-
-              <div className="mt-6 flex justify-end">
-                {interview.status === "COMPLETED" ? (
                   <Link
-                    href={`/interview/${interview.id}/report`}
+                    href={
+                      interview.status ===
+                      "COMPLETED"
+                        ? `/interview/${interview.id}/report`
+                        : `/interview/${interview.id}`
+                    }
                   >
-                    <Button>
-                      View Report
+                    <Button
+                      variant="outline"
+                      size="sm"
+                    >
+                      {interview.status ===
+                      "COMPLETED"
+                        ? "View Report"
+                        : "Continue"}
                     </Button>
                   </Link>
-                ) : (
-                  <Link
-                    href={`/interview/${interview.id}`}
-                  >
-                    <Button>
-                      Continue Interview
-                    </Button>
-                  </Link>
-                )}
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
-}
-
-function StatusBadge({
-  status,
-}: {
-  status: InterviewSessionStatus;
-}) {
-  switch (status) {
-    case "COMPLETED":
-      return <Badge>Completed</Badge>;
-
-    case "IN_PROGRESS":
-      return (
-        <Badge variant="secondary">
-          In Progress
-        </Badge>
-      );
-
-    case "SCHEDULED":
-      return (
-        <Badge variant="outline">
-          Scheduled
-        </Badge>
-      );
-
-    case "CANCELLED":
-      return (
-        <Badge variant="destructive">
-          Cancelled
-        </Badge>
-      );
-
-    default:
-      return <Badge>{status}</Badge>;
-  }
-}
-
-function formatLabel(value: string) {
-  return value
-    .toLowerCase()
-    .split("_")
-    .map(
-      (word) =>
-        word.charAt(0).toUpperCase() +
-        word.slice(1)
-    )
-    .join(" ");
 }
