@@ -10,11 +10,13 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 
 interface Props {
+  id?: string,
   title: string;
   progress: number;
 }
 
 export default function CurrentRoadmap({
+  id,
   title,
   progress,
 }: Props) {
@@ -37,11 +39,20 @@ export default function CurrentRoadmap({
 
         <Progress value={progress} />
 
-        <Link href="/roadmap">
-          <Button className="w-full">
-            Continue Learning
-          </Button>
-        </Link>
+        {id ? (
+  <Link href={`/roadmap/${id}`}>
+    <Button className="w-full">
+      Continue Learning
+    </Button>
+  </Link>
+) : (
+  <Button
+    className="w-full"
+    disabled
+  >
+    Generate a Roadmap First
+  </Button>
+)}
       </CardContent>
     </Card>
   );
