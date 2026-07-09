@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "@/lib/auth/server";
 import { generateRoadmapWithAI } from "@/lib/ai/roadmap";
@@ -67,14 +68,13 @@ export async function generateRoadmapAction(
     data: {
       userId: session.user.id,
       companyId,
-
       title: roadmap.title,
       targetRole,
-
-      content: roadmap,
-
+  
+      content: roadmap as unknown as Prisma.InputJsonValue,
+  
       progress: 0,
-
+      completedTasks: [] as Prisma.InputJsonValue,
       status: "ACTIVE",
     },
   });

@@ -1,6 +1,6 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { headers } from "next/headers";
-
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth";
 
@@ -42,7 +42,7 @@ export const ourFileRouter = {
 
           // Reset previous AI results when a new resume is uploaded
           extractedText: null,
-          analysis: null,
+          analysis: Prisma.JsonNull,
         },
 
         create: {

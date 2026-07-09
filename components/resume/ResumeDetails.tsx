@@ -13,7 +13,7 @@ export default function ResumeDetails({ resume }: Props) {
     return (
       <div className="rounded-lg border p-6 text-center">
         <p className="text-muted-foreground">
-          You haven't uploaded a resume yet.
+          You haven&apos;t uploaded a resume yet.
         </p>
       </div>
     );
@@ -48,7 +48,7 @@ export default function ResumeDetails({ resume }: Props) {
 
       {resume.analysis && (
   <ResumeAnalysis
-    analysis={resume.analysis as ResumeAnalysisType}
+    analysis={resume.analysis as unknown as ResumeAnalysisType}
   />
 )}
     </div>

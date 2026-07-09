@@ -10,22 +10,33 @@ import { startInterviewAction } from "@/lib/actions/interview";
 
 interface Props {
   companyId: string;
-  type: "TECHNICAL" | "BEHAVIORAL" | "SYSTEM_DESIGN" | "MIXED";
+  type:
+    | "TECHNICAL"
+    | "BEHAVIORAL"
+    | "SYSTEM_DESIGN"
+    | "MIXED";
   difficulty: "EASY" | "MEDIUM" | "HARD";
-  disabled?: boolean;
+  resumeReady: boolean;
 }
 
 export default function StartInterviewButton({
   companyId,
   type,
   difficulty,
-  disabled = false,
+  resumeReady,
 }: Props) {
   const router = useRouter();
 
   const [isPending, startTransition] = useTransition();
 
   function handleClick() {
+    if (!resumeReady) {
+      toast.error(
+        "Please upload and analyze your resume before starting an interview."
+      );
+      return;
+    }
+
     startTransition(async () => {
       try {
         const interviewId = await startInterviewAction(
@@ -51,9 +62,13 @@ export default function StartInterviewButton({
     <Button
       className="w-full"
       onClick={handleClick}
-      disabled={disabled || isPending}
+      disabled={isPending || !resumeReady}
     >
-      {isPending ? "Starting Interview..." : "Start Interview"}
+      {isPending
+        ? "Starting Interview..."
+        : resumeReady
+        ? "Start Interview"
+        : "Analyze Resume First"}
     </Button>
   );
 }

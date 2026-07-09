@@ -31,8 +31,8 @@ export default async function RoadmapPage({ params }: Props) {
     >
       <RoadmapView
         roadmapId={roadmap.id}
-        roadmap={roadmap.content as RoadmapContent}
-        completedTasks={roadmap.completedTasks as string[]}
+        roadmap={roadmap.content as unknown as RoadmapContent}
+        completedTasks={roadmap.completedTasks as unknown as string[]}
         progress={roadmap.progress}
     />
     </DashboardCard>

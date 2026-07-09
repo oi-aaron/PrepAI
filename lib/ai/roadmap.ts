@@ -40,7 +40,7 @@ ${targetRole ?? "Not specified"}
 
   try {
     return JSON.parse(text) as RoadmapContent;
-  } catch (err) {
+  } catch {
     console.error("Invalid Gemini Roadmap JSON:", text);
     throw new Error("Gemini returned invalid roadmap JSON.");
   }

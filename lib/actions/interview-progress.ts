@@ -2,11 +2,17 @@
 
 import prisma from "@/lib/prisma";
 import { getServerSession } from "@/lib/auth/server";
-import { InterviewSessionWithContent } from "@/lib/types/interview";
+import {
+  InterviewAnswer,
+  InterviewContent,
+  InterviewFeedback,
+  InterviewSessionWithContent,
+} from "@/lib/types/interview";
+import { Prisma } from "@prisma/client";
 
 export async function getInterviewSession(
   interviewId: string
-) {
+): Promise<InterviewSessionWithContent> {
   const session = await getServerSession();
 
   if (!session?.user) {
@@ -30,7 +36,15 @@ export async function getInterviewSession(
     throw new Error("Unauthorized");
   }
 
-  return interview as InterviewSessionWithContent;
+  return {
+    ...interview,
+    questions:
+      (interview.questions as unknown as InterviewContent) ?? null,
+    answers:
+      (interview.answers as unknown as InterviewAnswer[]) ?? [],
+    feedback:
+      (interview.feedback as unknown as InterviewFeedback) ?? null,
+  };
 }
 
 export async function saveAnswerAction(
@@ -59,19 +73,14 @@ export async function saveAnswerAction(
   }
 
   const answers =
-    (interview.answers as
-      | {
-          questionIndex: number;
-          answer: string;
-        }[]
-      | null) ?? [];
+    (interview.answers as unknown as InterviewAnswer[]) ?? [];
 
-  const existingIndex = answers.findIndex(
+  const existingAnswer = answers.find(
     (item) => item.questionIndex === questionIndex
   );
 
-  if (existingIndex >= 0) {
-    answers[existingIndex].answer = answer;
+  if (existingAnswer) {
+    existingAnswer.answer = answer;
   } else {
     answers.push({
       questionIndex,
@@ -84,7 +93,7 @@ export async function saveAnswerAction(
       id: interviewId,
     },
     data: {
-      answers,
+      answers: answers as unknown as Prisma.InputJsonValue,
     },
   });
 

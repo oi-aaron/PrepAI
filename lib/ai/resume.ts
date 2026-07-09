@@ -43,7 +43,7 @@ ${resumeText}
 
   try {
     return JSON.parse(text);
-  } catch (err) {
+  } catch {
     console.error("Invalid Gemini JSON:", text);
     throw new Error("Gemini returned invalid JSON.");
   }

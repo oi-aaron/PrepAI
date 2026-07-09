@@ -3,6 +3,21 @@
 import prisma from "@/lib/prisma";
 import { getServerSession } from "@/lib/auth/server";
 
+type RoadmapTask = {
+  id: string;
+  title: string;
+  description?: string;
+};
+
+type RoadmapWeek = {
+  title: string;
+  tasks: RoadmapTask[];
+};
+
+type RoadmapContent = {
+  weeks: RoadmapWeek[];
+};
+
 export async function toggleTaskCompletion(
   roadmapId: string,
   taskId: string
@@ -13,7 +28,6 @@ export async function toggleTaskCompletion(
     throw new Error("Unauthorized");
   }
 
-  // Fetch roadmap
   const roadmap = await prisma.roadmap.findUnique({
     where: {
       id: roadmapId,
@@ -24,17 +38,14 @@ export async function toggleTaskCompletion(
     throw new Error("Roadmap not found.");
   }
 
-  // Ensure the roadmap belongs to the logged-in user
   if (roadmap.userId !== session.user.id) {
     throw new Error("Unauthorized");
   }
 
-  // Read completed tasks
   const completedTasks = Array.isArray(roadmap.completedTasks)
     ? [...(roadmap.completedTasks as string[])]
     : [];
 
-  // Toggle task
   const index = completedTasks.indexOf(taskId);
 
   if (index >= 0) {
@@ -43,21 +54,18 @@ export async function toggleTaskCompletion(
     completedTasks.push(taskId);
   }
 
-  // Calculate total tasks
-  const content = roadmap.content as any;
+  const content = roadmap.content as RoadmapContent;
 
   const totalTasks = content.weeks.reduce(
-    (total: number, week: any) => total + week.tasks.length,
+    (total, week) => total + week.tasks.length,
     0
   );
 
-  // Calculate progress
   const progress =
     totalTasks === 0
       ? 0
       : Math.round((completedTasks.length / totalTasks) * 100);
 
-  // Save
   await prisma.roadmap.update({
     where: {
       id: roadmapId,

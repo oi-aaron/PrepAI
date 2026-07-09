@@ -42,6 +42,16 @@ export default function InterviewPlayer({
 
   const totalQuestions = questions.length;
 
+  const current = questions[currentQuestion];
+
+if (!current) {
+  return (
+    <p className="text-center text-muted-foreground">
+      Invalid interview question.
+    </p>
+  );
+}
+
   async function nextQuestion() {
     if (isEvaluating) return;
 
@@ -152,7 +162,7 @@ export default function InterviewPlayer({
       {/* Question */}
       <div className="rounded-lg border p-6">
         <h3 className="text-lg font-medium">
-          {questions[currentQuestion].question}
+          {current.question}
         </h3>
       </div>
 

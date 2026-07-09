@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { InterviewSession, Company } from "@prisma/client";
+import {
+  InterviewDifficulty,
+  InterviewSessionStatus,
+  InterviewType,
+} from "@prisma/client";
 import { Plus } from "lucide-react";
 
 import {
@@ -12,10 +16,21 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+type RecentInterview = {
+  id: string;
+  title: string;
+  type: InterviewType;
+  difficulty: InterviewDifficulty;
+  status: InterviewSessionStatus;
+  score: number | null;
+  createdAt: Date;
+  company: {
+    name: string;
+  } | null;
+};
+
 interface Props {
-  interviews: (InterviewSession & {
-    company: Company | null;
-  })[];
+  interviews: RecentInterview[];
 }
 
 export default function RecentInterviews({
@@ -24,9 +39,7 @@ export default function RecentInterviews({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>
-          Recent Interviews
-        </CardTitle>
+        <CardTitle>Recent Interviews</CardTitle>
 
         <Link href="/interview">
           <Button size="sm">
@@ -60,14 +73,12 @@ export default function RecentInterviews({
                     </p>
                   </div>
 
-                  <Badge>
-                    {interview.status}
-                  </Badge>
+                  <Badge>{interview.status}</Badge>
                 </div>
 
                 <div className="mt-4 flex items-center justify-between">
                   <div className="text-sm">
-                    {interview.score != null ? (
+                    {interview.score !== null ? (
                       <span className="font-medium">
                         {interview.score}/100
                       </span>
@@ -80,8 +91,7 @@ export default function RecentInterviews({
 
                   <Link
                     href={
-                      interview.status ===
-                      "COMPLETED"
+                      interview.status === "COMPLETED"
                         ? `/interview/${interview.id}/report`
                         : `/interview/${interview.id}`
                     }
@@ -90,8 +100,7 @@ export default function RecentInterviews({
                       variant="outline"
                       size="sm"
                     >
-                      {interview.status ===
-                      "COMPLETED"
+                      {interview.status === "COMPLETED"
                         ? "View Report"
                         : "Continue"}
                     </Button>
