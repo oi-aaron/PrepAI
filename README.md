@@ -2,6 +2,9 @@
 
 AI-powered interview preparation platform that helps students prepare for software engineering interviews using Generative AI.
 
+🚀 Live Demo:
+https://prep-ai-xi-nine.vercel.app
+
 ## 🚀 Features
 
 - Secure authentication with Better Auth
