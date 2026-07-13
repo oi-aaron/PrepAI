@@ -1,4 +1,8 @@
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 import {
   Card,
@@ -6,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -16,6 +21,14 @@ interface Props {
 export default function ResumeStatus({
   resumeReady,
 }: Props) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  function handleClick() {
+    setLoading(true);
+    router.push("/resume");
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -31,11 +44,20 @@ export default function ResumeStatus({
               Your resume has been uploaded and analyzed by AI.
             </p>
 
-            <Link href="/resume">
-              <Button className="w-full">
-                View Resume
-              </Button>
-            </Link>
+            <Button
+              className="w-full"
+              onClick={handleClick}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Opening...
+                </>
+              ) : (
+                "View Resume"
+              )}
+            </Button>
           </>
         ) : (
           <>
@@ -47,11 +69,20 @@ export default function ResumeStatus({
               Upload your resume to unlock AI features.
             </p>
 
-            <Link href="/resume">
-              <Button className="w-full">
-                Upload Resume
-              </Button>
-            </Link>
+            <Button
+              className="w-full"
+              onClick={handleClick}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Opening...
+                </>
+              ) : (
+                "Upload Resume"
+              )}
+            </Button>
           </>
         )}
       </CardContent>

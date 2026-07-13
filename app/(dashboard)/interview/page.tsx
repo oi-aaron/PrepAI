@@ -42,6 +42,7 @@ export default async function InterviewPage() {
       }),
     ]);
 
+  
   const resumeReady = !!resume?.extractedText;
 
   return (

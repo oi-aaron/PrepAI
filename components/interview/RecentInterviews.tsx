@@ -1,10 +1,13 @@
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   InterviewDifficulty,
   InterviewSessionStatus,
   InterviewType,
 } from "@prisma/client";
-import { Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 
 import {
   Card,
@@ -12,7 +15,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -36,17 +38,48 @@ interface Props {
 export default function RecentInterviews({
   interviews,
 }: Props) {
+  const router = useRouter();
+
+  const [loadingNew, setLoadingNew] = useState(false);
+  const [loadingInterview, setLoadingInterview] = useState<string | null>(null);
+
+  function handleNewInterview() {
+    setLoadingNew(true);
+    router.push("/interview");
+  }
+
+  function handleInterviewClick(interview: RecentInterview) {
+    setLoadingInterview(interview.id);
+
+    router.push(
+      interview.status === "COMPLETED"
+        ? `/interview/${interview.id}/report`
+        : `/interview/${interview.id}`
+    );
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Recent Interviews</CardTitle>
 
-        <Link href="/interview">
-          <Button size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            New
-          </Button>
-        </Link>
+        <Button
+          size="sm"
+          onClick={handleNewInterview}
+          disabled={loadingNew}
+        >
+          {loadingNew ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Opening...
+            </>
+          ) : (
+            <>
+              <Plus className="mr-2 h-4 w-4" />
+              New
+            </>
+          )}
+        </Button>
       </CardHeader>
 
       <CardContent>
@@ -64,8 +97,7 @@ export default function RecentInterviews({
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="font-semibold">
-                      {interview.company?.name ??
-                        "Unknown Company"}
+                      {interview.company?.name ?? "Unknown Company"}
                     </h3>
 
                     <p className="text-sm text-muted-foreground">
@@ -89,22 +121,23 @@ export default function RecentInterviews({
                     )}
                   </div>
 
-                  <Link
-                    href={
-                      interview.status === "COMPLETED"
-                        ? `/interview/${interview.id}/report`
-                        : `/interview/${interview.id}`
-                    }
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={loadingInterview === interview.id}
+                    onClick={() => handleInterviewClick(interview)}
                   >
-                    <Button
-                      variant="outline"
-                      size="sm"
-                    >
-                      {interview.status === "COMPLETED"
-                        ? "View Report"
-                        : "Continue"}
-                    </Button>
-                  </Link>
+                    {loadingInterview === interview.id ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        
+                      </>
+                    ) : interview.status === "COMPLETED" ? (
+                      "View Report"
+                    ) : (
+                      "Continue"
+                    )}
+                  </Button>
                 </div>
               </div>
             ))}

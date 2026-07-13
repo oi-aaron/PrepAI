@@ -12,6 +12,14 @@ import {
   InterviewType,
 } from "@prisma/client";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 interface Props {
   companies: Company[];
 
@@ -56,22 +64,27 @@ export default function InterviewSetup({
           Company
         </label>
 
-        <select
-          className="w-full rounded-md border p-2"
+        <Select
           value={companyId}
-          onChange={(e) =>
-            setCompanyId(e.target.value)
-          }
+          onValueChange={(value) => setCompanyId(value ?? "")}
         >
-          {companies.map((company) => (
-            <option
-              key={company.id}
-              value={company.id}
-            >
-              {company.name}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-full">
+            <SelectValue>
+              {companies.find((c) => c.id === companyId)?.name}
+            </SelectValue>
+        </SelectTrigger>
+
+          <SelectContent>
+            {companies.map((company) => (
+              <SelectItem
+                key={company.id}
+                value={company.id}
+              >
+                {company.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Interview Type */}
@@ -80,29 +93,34 @@ export default function InterviewSetup({
           Interview Type
         </label>
 
-        <select
-          className="w-full rounded-md border p-2"
+        <Select
           value={type}
-          onChange={(e) =>
-            setType(e.target.value as typeof type)
+          onValueChange={(value) =>
+            setType(value as typeof type)
           }
         >
-          <option value="TECHNICAL">
-            Technical
-          </option>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
 
-          <option value="BEHAVIORAL">
-            Behavioral
-          </option>
+          <SelectContent>
+            <SelectItem value="TECHNICAL">
+              Technical
+            </SelectItem>
 
-          <option value="SYSTEM_DESIGN">
-            System Design
-          </option>
+            <SelectItem value="BEHAVIORAL">
+              Behavioral
+            </SelectItem>
 
-          <option value="MIXED">
-            Mixed
-          </option>
-        </select>
+            <SelectItem value="SYSTEM_DESIGN">
+              System Design
+            </SelectItem>
+
+            <SelectItem value="MIXED">
+              Mixed
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Difficulty */}
@@ -111,27 +129,32 @@ export default function InterviewSetup({
           Difficulty
         </label>
 
-        <select
-          className="w-full rounded-md border p-2"
+        <Select
           value={difficulty}
-          onChange={(e) =>
+          onValueChange={(value) =>
             setDifficulty(
-              e.target.value as typeof difficulty
+              value as typeof difficulty
             )
           }
         >
-          <option value="EASY">
-            Easy
-          </option>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
 
-          <option value="MEDIUM">
-            Medium
-          </option>
+          <SelectContent>
+            <SelectItem value="EASY">
+              Easy
+            </SelectItem>
 
-          <option value="HARD">
-            Hard
-          </option>
-        </select>
+            <SelectItem value="MEDIUM">
+              Medium
+            </SelectItem>
+
+            <SelectItem value="HARD">
+              Hard
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <StartInterviewButton

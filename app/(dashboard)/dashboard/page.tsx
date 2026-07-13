@@ -106,9 +106,9 @@ export default async function DashboardPage() {
         />
 
 <CurrentRoadmap
-  id={roadmap?.id}
-  title={roadmap?.title ?? "No roadmap yet"}
-  progress={roadmap?.progress ?? 0}
+    roadmapId={roadmap?.id}
+    title={roadmap?.title ?? "No roadmap yet"}
+    progress={roadmap?.progress ?? 0}
 />
 
         <RecentInterviews
